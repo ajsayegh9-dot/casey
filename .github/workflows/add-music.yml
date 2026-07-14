@@ -1,10 +1,12 @@
-name: Fix music player text
+name: Add autoplay music
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 jobs:
-  fix-text:
+  inject-audio:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -12,16 +14,21 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Find placeholder and remove it
+      - name: Inject audio autoplay into index.html
         run: |
-          grep -c "Add your MP3" index.html && echo "Found it" || echo "Not found"
-          perl -i -pe 's/Add your MP3 file to turn this into a real soundtrack\.//g' index.html
-          grep -c "Add your MP3" index.html && echo "Still there" || echo "Removed successfully"
+          # Only inject if not already present
+          if ! grep -q 'id="bg-music"' index.html; then
+            AUDIO_CODE='<audio id="bg-music" src="apocalypse.mp3" loop style="display:none"></audio><script>window.addEventListener("load",function(){var a=document.getElementById("bg-music");var p=a.play();if(p!==undefined){p.catch(function(){document.body.addEventListener("click",function(){a.play();},{once:true});});}});<\/script>'
+            sed -i "s|</body>|${AUDIO_CODE}</body>|" index.html
+            echo "Audio injected successfully"
+          else
+            echo "Audio already present, skipping"
+          fi
 
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Remove music placeholder text" || echo "No changes to commit"
+          git commit -m "Add autoplay music to index.html" || echo "No changes to commit"
           git push

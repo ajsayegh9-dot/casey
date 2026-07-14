@@ -14,16 +14,14 @@ jobs:
 
       - name: Download MP3
         run: |
-          curl -L "https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/110348240/9c4b4122-06f5-47a4-86a8-3ddcc7d66928/Cigarettes_After_Sex_-_Apocalypse_-SkySound.cc.mp3" -o apocalypse.mp3
-
-      - name: Update audio src in index.html
-        run: |
-          sed -i 's|<audio id="bgMusic"[^>]*>|<audio id="bgMusic" src="apocalypse.mp3" loop>|g' index.html
+          curl -L "https://archive.org/download/cigarettes-after-sex-songs-compilation_202203/Apocalypse%20-%20Cigarettes%20After%20Sex.mp3" -o apocalypse.mp3
+          # Verify it's an MP3 (not an error page)
+          file apocalypse.mp3
 
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add apocalypse.mp3 index.html
-          git commit -m "Add Apocalypse MP3 and fix audio src" || echo "No changes to commit"
+          git add apocalypse.mp3
+          git commit -m "Replace with real Apocalypse MP3 from Archive.org" || echo "No changes to commit"
           git push

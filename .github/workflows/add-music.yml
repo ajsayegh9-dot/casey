@@ -12,31 +12,16 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Find and remove placeholder text
+      - name: Find placeholder and remove it
         run: |
-          grep -n "Add your MP3" index.html | head -5
-          python3 -c "
-import re
-with open('index.html', 'r', encoding='utf-8') as f:
-    content = f.read()
-original = content
-content = content.replace('Add your MP3 file to turn this into a real soundtrack.', '')
-if content != original:
-    with open('index.html', 'w', encoding='utf-8') as f:
-        f.write(content)
-    print('Placeholder text removed!')
-else:
-    print('Text not found with exact match, trying grep...')
-    import subprocess
-    result = subprocess.run(['grep', '-o', '.{50}Add your MP3.{50}', 'index.html'], capture_output=True, text=True)
-    print(result.stdout[:500])
-"
+          grep -c "Add your MP3" index.html && echo "Found it" || echo "Not found"
+          perl -i -pe 's/Add your MP3 file to turn this into a real soundtrack\.//g' index.html
+          grep -c "Add your MP3" index.html && echo "Still there" || echo "Removed successfully"
 
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git diff --cached --stat
           git commit -m "Remove music placeholder text" || echo "No changes to commit"
           git push

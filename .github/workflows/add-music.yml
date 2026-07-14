@@ -1,10 +1,10 @@
-name: Download and commit music file
+name: Fix music player text
 
 on:
   workflow_dispatch:
 
 jobs:
-  add-music:
+  fix-text:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -12,16 +12,14 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Download MP3
+      - name: Remove placeholder text from index.html
         run: |
-          curl -L "https://archive.org/download/cigarettes-after-sex-songs-compilation_202203/Apocalypse%20-%20Cigarettes%20After%20Sex.mp3" -o apocalypse.mp3
-          # Verify it's an MP3 (not an error page)
-          file apocalypse.mp3
+          sed -i 's/Add your MP3 file to turn this into a real soundtrack\.//g' index.html
 
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add apocalypse.mp3
-          git commit -m "Replace with real Apocalypse MP3 from Archive.org" || echo "No changes to commit"
+          git add index.html
+          git commit -m "Remove music placeholder text" || echo "No changes to commit"
           git push
